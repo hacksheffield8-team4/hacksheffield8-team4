@@ -17,7 +17,11 @@ df = df.sort_values(by='Formatted_DateTime')
 
 batteryEfficiency = 0.92
 
+<<<<<<< HEAD
 newNumberOfPanels = 17
+=======
+numberOfPanels = 12
+>>>>>>> refs/remotes/origin/main
 numberOfBatteries = 1
 
 costOfPanels = newNumberOfPanels * 80
@@ -52,9 +56,10 @@ df['energy_for_15m'] = df.apply(lambda x: ((x['pv_totalPower_kW']/x['NumberOfPan
 df.to_csv('customerData_modified.csv', index=False, encoding='utf-8')
 
 # Prints total cost for one year
-print(costOfPanels + df['cost_for_15m'].sum())
-print((df['load_power_kW'].sum())/4)
-print(df['energy_for_15m'].sum())
+print('Total cost after export: ', (costOfPanels + df['cost_for_15m'].sum()))
+print('Power consumed: ', ((df['load_power_kW'].sum())/4))
+print('Power generated: ', (df['energy_for_15m'].sum()))
+print('Total cost before solar: ', ())
 
 # df['F(x)'] = df.loc[df['customerID'] == 62].mul(df['load_power_kW'], df['price_total_NZDperkWh'])
 # print(df['F(x)'])
