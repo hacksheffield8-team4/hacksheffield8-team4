@@ -7,14 +7,14 @@ df = pd.read_csv("customerData.csv")
 df_duplicates_removed = df.drop_duplicates()
 # df.to_csv('customerData_new.csv', index=False, encoding='utf-8')
 
+# Choose a specific customer by ID
+customerID = 15
+df = df.loc[df['customerID'] == customerID]
+
 # Sort csv by date and time
 df['Formatted_DateTime'] = pd.to_datetime(df['Date_UTC'])
 df = df.sort_values(by='Formatted_DateTime')
 # df.to_csv('customerData_sortedByDateTime.csv', index=False)
-
-# Choose a specific customer by ID
-customerID = 15
-df = df.loc[df['customerID'] == customerID]
 
 batteryEfficiency = 0.92
 
