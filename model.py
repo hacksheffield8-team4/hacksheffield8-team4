@@ -3,8 +3,9 @@ import numpy as np
 
 df = pd.read_csv("customerData.csv")
 
-# Remove duplicate rows
+# Remove duplicate rows and save to new csv
 df_duplicates_removed = df.drop_duplicates()
+df.to_csv('customerData_new.csv', index=False, encoding='utf-8')
 
 batteryEfficiency = 0.92
 
