@@ -17,7 +17,7 @@ df = df.sort_values(by='Formatted_DateTime')
 
 batteryEfficiency = 0.92
 
-newNumberOfPanels = 17
+newNumberOfPanels = 9
 numberOfBatteries = 1
 
 costOfPanels = newNumberOfPanels * 80
@@ -66,7 +66,7 @@ df.to_csv('customerData_modified.csv', index=False, encoding='utf-8')
 print('Total cost after export: ', (costOfPanels + df['cost_for_15m'].sum()))
 print('Power consumed: ', ((df['load_power_kW'].sum())/4))
 print('Power generated: ', (df['solar_energy_for_15m'].sum()))
-print('Percentage Renewable: ', ())
+print('Percentage Renewable: ', (df['home_renewableFraction'].mean()))
 print('Total cost before solar: ', ())
 
 # df['F(x)'] = df.loc[df['customerID'] == 62].mul(df['load_power_kW'], df['price_total_NZDperkWh'])
