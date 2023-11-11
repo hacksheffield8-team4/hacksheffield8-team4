@@ -12,11 +12,8 @@ batteryEfficiency = 0.92
 numberOfPanels = 18
 numberOfBatteries = 1
 
-def calculateCost(numberOfPanels, numberOfBatteries):
-    batteryCost = 3000
-    panelCost = 200
-    cost = numberOfBatteries * batteryCost + numberOfPanels * panelCost
-    
+def calculateCost(numberOfPanels, load, pvPower, priceOfEnergy, numberOfBatteries):
+    cost = numberOfPanels * 200 + ((load - pvPower) * priceOfEnergy)/4
     return cost
 
 df['F(x)'] = df.loc[df['customerID'] == 62].mul(df['load_power_kW'], df['price_total_NZDperkWh'])
