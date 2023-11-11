@@ -49,8 +49,8 @@ df.loc[hasExcessPower, 'export_income'] = (((df['pv_totalPower_kW'] * newNumberO
 df['solar_energy_for_15m'] = df.apply(lambda x: ((x['pv_totalPower_kW']/x['NumberOfPanels'])*newNumberOfPanels)/4, axis=1)
 
 df.loc[hasExcessPower, 'home_renewableFraction'] = 1
-#df.loc[not hasExcessPower, 'home_renewableFraction'] = (((df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']) + ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']))) 
-#                                 * df['grid_renewableFraction_pct'])) / df['load_power_kW']
+df.loc[~hasExcessPower, 'home_renewableFraction'] = (((df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']) + ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']))) 
+                                 * df['grid_renewableFraction_pct'])) / df['load_power_kW']
 
 #df['home_renewableFraction'] = (1 if df.loc(hasExcessPower) else 
 #                                (((df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']) + ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']))) 
@@ -67,10 +67,3 @@ print('Power consumed: ', ((df['load_power_kW'].sum())/4))
 print('Power generated: ', (df['solar_energy_for_15m'].sum()))
 print('Percentage Renewable: ', ())
 print('Total cost before solar: ', ())
-
-# df['F(x)'] = df.loc[df['customerID'] == 62].mul(df['load_power_kW'], df['price_total_NZDperkWh'])
-# print(df['F(x)'])
-# print(df.loc[df['customerID'] == 62])
-# print(calculateCost(numberOfPanels, numberOfBatteries))
-
-# print(df.dtypes)
