@@ -50,8 +50,8 @@ df['solar_energy_for_15m'] = df.apply(lambda x: ((x['pv_totalPower_kW']/x['Numbe
 
 # Giving a renewable fraction to each 15 minute row
 df.loc[hasExcessPower, 'home_renewableFraction'] = 1
-#df.loc[not hasExcessPower, 'home_renewableFraction'] = (((df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']) + ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']))) 
-#                                 * df['grid_renewableFraction_pct'])) / df['load_power_kW']
+df.loc[~hasExcessPower, 'home_renewableFraction'] = (((df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']) + ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']))) 
+                                 * df['grid_renewableFraction_pct'])) / df['load_power_kW']
 
 #df['home_renewableFraction'] = (1 if df.loc(hasExcessPower) else 
 #                                (((df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']) + ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']))) 
