@@ -5,7 +5,6 @@ df = pd.read_csv("customerData.csv")
 
 # Remove duplicate rows and save to new csv
 df_duplicates_removed = df.drop_duplicates()
-# df.to_csv('customerData_new.csv', index=False, encoding='utf-8')
 
 # Choose a specific customer by ID
 customerID = 15
@@ -14,7 +13,6 @@ df = df.loc[df['customerID'] == customerID]
 # Sort csv by date and time
 df['Formatted_DateTime'] = pd.to_datetime(df['Date_UTC'])
 df = df.sort_values(by='Formatted_DateTime')
-# df.to_csv('customerData_sortedByDateTime.csv', index=False)
 
 batteryEfficiency = 0.92
 
@@ -28,9 +26,13 @@ costOfBatteries = numberOfBatteries * 200
 #    cost = ((loadPower - pvPower) * priceOfEnergy)/4
 #    return cost
 
+# Adds column to DataFrame with cost for each 15 minute interval
 df['cost_for_15m'] = df.apply(lambda x: ((x['load_power_kW'] - x['pv_totalPower_kW']) * x['price_total_NZDperkWh'])/4, axis=1)
-# df.to_csv('customerData_with_costs.csv', index=False, encoding='utf-8')
 
+# Produces csv with final DataFrame
+df.to_csv('customerData_modified.csv', index=False, encoding='utf-8')
+
+# Prints total cost for one year
 print(df['cost_for_15m'].sum())
 
 # df['F(x)'] = df.loc[df['customerID'] == 62].mul(df['load_power_kW'], df['price_total_NZDperkWh'])
