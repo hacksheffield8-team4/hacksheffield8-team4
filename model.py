@@ -15,8 +15,8 @@ numberOfBatteries = 1
 costOfPanels = numberOfPanels * 20
 costOfBatteries = numberOfBatteries * 200
 
-def calculateCost(load, pvPower, priceOfEnergy, numberOfBatteries):
-    cost = ((load - pvPower) * priceOfEnergy)/4
+def calculateCost(loadPower, pvPower, priceOfEnergy, numberOfBatteries):
+    cost = ((loadPower - pvPower) * priceOfEnergy)/4
     return cost
 
 df['cost_for_15m'] = df.apply(lambda x: ((x['load_power_kW'] - x['pv_totalPower_kW']) * x['price_total_NZDperkWh'])/4, axis=1)
