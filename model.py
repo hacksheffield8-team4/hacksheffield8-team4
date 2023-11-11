@@ -23,17 +23,8 @@ numberOfBatteries = 1
 costOfPanels = newNumberOfPanels * 80
 costOfBatteries = numberOfBatteries * 200
 
-#def calculateCost(loadPower, pvPower, priceOfEnergy, numberOfBatteries):
-#    cost = ((loadPower - pvPower) * priceOfEnergy)/4
-#    return cost
-
 # Adds column to DataFrame with cost for each 15 minute interval
 df['cost_for_15m'] = df['price_gridImport_NZDperkWh'] * ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels'])) / 4)
-
-# df['cost_for_15m'] = df.apply(lambda x: 
-#                              ((x['load_power_kW'] -((x['pv_totalPower_kW']/x['NumberOfPanels'])*numberOfPanels) * x['price_gridImport_NZDperkWh'])/4) 
-#                              if (x['load_power_kW'] - (x['pv_totalPower_kW']/x['NumberOfPanels'])*numberOfPanels > 0)
-# else ((x['load_power_kW'] -((x['pv_totalPower_kW']/x['NumberOfPanels'])*numberOfPanels) * x['price_gridExport_NZDperkWh'])/4), axis=1)
 
 # Makes negative costs equal 0
 hasExcessPower = (df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels'])) < 0
@@ -52,10 +43,6 @@ df['solar_energy_for_15m'] = df.apply(lambda x: ((x['pv_totalPower_kW']/x['Numbe
 df.loc[hasExcessPower, 'home_renewableFraction'] = 1
 df.loc[~hasExcessPower, 'home_renewableFraction'] = (((df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']) + ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']))) 
                                  * df['grid_renewableFraction_pct'])) / df['load_power_kW']
-
-#df['home_renewableFraction'] = (1 if df.loc(hasExcessPower) else 
-#                                (((df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']) + ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']))) 
-#                                 * df['grid_renewableFraction_pct'])) / df['load_power_kW'])
 
 #df['battery_energy'] = df.apply(lambda x: )
 
