@@ -3,6 +3,9 @@ import numpy as np
 
 df = pd.read_csv("customerData.csv")
 
+# Remove duplicate rows
+df_duplicates_removed = df.drop_duplicates()
+
 batteryEfficiency = 0.92
 
 numberOfPanels = 18
