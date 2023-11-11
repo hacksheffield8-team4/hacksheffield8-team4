@@ -19,10 +19,12 @@ def calculateCost(load, pvPower, priceOfEnergy, numberOfBatteries):
     cost = ((load - pvPower) * priceOfEnergy)/4
     return cost
 
+df['cost_for_15m'] = df.apply(lambda x: ((x['load_power_kW'] - x['pv_totalPower_kW']) * x['price_total_NZDperkWh'])/4, axis=1)
+df.to_csv('customerData_with_costs.csv', index=False, encoding='utf-8')
 
-df['F(x)'] = df.loc[df['customerID'] == 62].mul(df['load_power_kW'], df['price_total_NZDperkWh'])
-print(df['F(x)'])
-print(df.loc[df['customerID'] == 62])
-print(calculateCost(numberOfPanels, numberOfBatteries))
+# df['F(x)'] = df.loc[df['customerID'] == 62].mul(df['load_power_kW'], df['price_total_NZDperkWh'])
+# print(df['F(x)'])
+# print(df.loc[df['customerID'] == 62])
+# print(calculateCost(numberOfPanels, numberOfBatteries))
 
-print(df.dtypes)
+# print(df.dtypes)
