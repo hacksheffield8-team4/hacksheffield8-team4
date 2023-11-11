@@ -10,7 +10,7 @@ df.to_csv('customerData_new.csv', index=False, encoding='utf-8')
 # Sort csv by date and time
 df['Formatted_DateTime'] = pd.to_datetime(df['Date_UTC'])
 df = df.sort_values(by='Formatted_DateTime')
-df.to_csv('customerData_sortedByDatTime.csv', index=False)
+df.to_csv('customerData_sortedByDateTime.csv', index=False)
 
 batteryEfficiency = 0.92
 
