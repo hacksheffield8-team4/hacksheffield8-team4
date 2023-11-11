@@ -16,7 +16,7 @@ df = df.sort_values(by='Formatted_DateTime')
 
 batteryEfficiency = 0.92
 
-numberOfPanels = 10
+numberOfPanels = 2500000
 numberOfBatteries = 1
 
 costOfPanels = numberOfPanels * 20
@@ -30,7 +30,7 @@ costOfBatteries = numberOfBatteries * 200
 df['cost_for_15m'] = df.apply(lambda x: 
                               ((x['load_power_kW'] -((x['pv_totalPower_kW']/x['NumberOfPanels'])*numberOfPanels) * x['price_gridImport_NZDperkWh'])/4) 
                               if (x['load_power_kW'] - (x['pv_totalPower_kW']/x['NumberOfPanels'])*numberOfPanels > 0)
-else ((x['load_power_kW'] -((x['pv_totalPower_kW']/x['NumberOfPanels'])*numberOfPanels) * x['price_gridImport_NZDperkWh'])/4), axis=1)
+else ((x['load_power_kW'] -((x['pv_totalPower_kW']/x['NumberOfPanels'])*numberOfPanels) * x['price_gridExport_NZDperkWh'])/4), axis=1)
 
 # Produces csv with final DataFrame
 df.to_csv('customerData_modified.csv', index=False, encoding='utf-8')
