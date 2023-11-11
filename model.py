@@ -7,6 +7,11 @@ df = pd.read_csv("customerData.csv")
 df_duplicates_removed = df.drop_duplicates()
 df.to_csv('customerData_new.csv', index=False, encoding='utf-8')
 
+# Sort csv by date and time
+df['Formatted_Date'] = pd.to_datetime(df['Date_UTC'])
+df = df.sort_values(by='Formatted_Date')
+df.to_csv('customerData_sortedByDate.csv', index=False)
+
 batteryEfficiency = 0.92
 
 numberOfPanels = 18
