@@ -37,6 +37,9 @@ df['energy2loadPreSolar'] = df['grid_renewableFraction_pct']*df['load_power_kW']
 # Column L - Power supplied to load
 df['pvSuppliedToLoad'] = df[['powerAfterScaling', 'load_power_kW']]
 
+# Column M - Battery mode
+df['batteryMode'] = 1
+
 # Adds column to DataFrame with cost for each 15 minute interval
 df['cost_for_15m'] = df['price_gridImport_NZDperkWh'] * ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels'])) / 4)
 
