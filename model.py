@@ -67,8 +67,10 @@ df['dischargeToGrid'] = ((df['batteryOutput']
 # Column S - Battery discharge
 df['batteryChargeDecrease'] = df['dischargeToLoad'] + df['dischargeToGrid']
 
+df['chargeAmount'] = df['batteryChargeIncrease'] - df['batteryChargeDecrease']
+
 # Column V - Battery state of charge in kWh TODO something is wrong here!!
-df['storedBatteryEnergy'] = df['storedBatteryEnergy'].shift(-1) + df['batteryChargeIncrease'] - df['batteryChargeDecrease']
+df['storedBatteryEnergy'] = df['chargeAmount'].cumsum()
 
 # Column W - Battery SOC%
 df['batterySOC'] =  df['storedBatteryEnergy']/batteryCapacity
