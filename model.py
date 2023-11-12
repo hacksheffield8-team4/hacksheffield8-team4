@@ -20,8 +20,14 @@ batteryEfficiency = 0.92
 newNumberOfPanels = 9
 numberOfBatteries = 1
 
+batteryCapacity = numberOfBatteries * 6
+
 costOfPanels = newNumberOfPanels * 80
 costOfBatteries = numberOfBatteries * 200
+
+# Column F - PV power after scaling factor
+df['powerAfterScaling'] = (df['pv_totalPower_kW'] * newNumberOfPanels) / df['NumberOfPanels']
+
 
 # Adds column to DataFrame with cost for each 15 minute interval
 df['cost_for_15m'] = df['price_gridImport_NZDperkWh'] * ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels'])) / 4)
@@ -42,9 +48,9 @@ df['solar_energy_for_15m'] = df.apply(lambda x: ((x['pv_totalPower_kW']/x['Numbe
 # Giving a renewable fraction to each 15 minute row
 df.loc[hasExcessPower, 'home_renewableFraction'] = 1
 df.loc[~hasExcessPower, 'home_renewableFraction'] = (((df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']) + ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels']))) 
-                                 * df['grid_renewableFraction_pct'])) / df['load_power_kW']
+                                                    * df['grid_renewableFraction_pct'])) / df['load_power_kW']
 
-#df['battery_energy'] = df.apply(lambda x: )
+df['stored_battery_energy'] = (6 if df['stored_battery_energy'].shift(-1) == 6 else 'TODO')
 
 # Produces csv with final DataFrame
 df.to_csv('customerData_modified.csv', index=False, encoding='utf-8')
