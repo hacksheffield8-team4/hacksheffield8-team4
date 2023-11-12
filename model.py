@@ -45,12 +45,12 @@ df['batteryInput'] = 0
 # Column O - Power out of battery
 df['batteryOutput'] = 0
 
-# Column Q - Charge from solar
+# Column Q - Charge from solar TODO need to use previous storedBatteryEnergy
 df['storedBatteryEnergy'] = 0
-df['chargeInFromSolar'] = df.apply(lambda x: (min(max(x['pvPowerAfterScaling'] - x['load_power_kW'], 0), batteryCapacity - x['storedBatteryEnergy'])) if x['batteryMode'] == 1 else 0, axis = 1)
+df['chargeInFromSolar'] = df.apply(lambda x: (min(max(x['pvPowerAfterScaling'] - x['load_power_kW'], 0), batteryCapacity - df['storedBatteryEnergy'].shift(-1))) if x['batteryMode'] == 1 else 0, axis = 1)
 
-# Column R - Charge from grid
-df['chargeInFromGrid'] = df.apply(lambda x: min(x['batteryInput'], batteryCapacity-x['storedBatteryEnergy']) if x['batteryMode'] == 2 else 0, axis = 1)
+# Column R - Charge from grid TODO need to use previous storedBatteryEnergy
+df['chargeInFromGrid'] = df.apply(lambda x: min(x['batteryInput'], batteryCapacity-df['storedBatteryEnergy'].shift(-1)) if x['batteryMode'] == 2 else 0, axis = 1)
 
 # Column P - Battery charge incrase
 df['batteryChargeIncrease'] = df['chargeInFromSolar'] + df['chargeInFromGrid']
