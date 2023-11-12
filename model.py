@@ -14,6 +14,7 @@ df = df.loc[df['customerID'] == customerID]
 # Sort csv by date and time
 df['Formatted_DateTime'] = pd.to_datetime(df['Date_UTC'])
 df = df.sort_values(by='Formatted_DateTime')
+df = df.reset_index(drop=True)
 
 batteryEfficiency = 0.92
 
@@ -59,13 +60,19 @@ def functionToOptimize(functionInputs):
     df['chargeInFromSolar'] = df.apply(lambda x: (min(max(x['pvPowerAfterScaling'] - x['load_power_kW'], 0), (functionInputs[1]*6) - x['storedBatteryEnergy'])) if x['batteryMode'] == 1 else 0, axis = 1)
 
     # Column R - Charge from grid
-    df['chargeInFromGrid'] = df.apply(lambda x: min(x['batteryInpuPowerFromGrid'], (functionInputs[1]*6)-x['storedBatteryEnergy']) if x['batteryMode'] == 2 else 0, axis = 1)
+    df['chargeInFromGrid'] = df.apply(lambda x: min(x['batteryInputPowerFromGrid'], (functionInputs[1]*6)-x['storedBatteryEnergy']) if x['batteryMode'] == 2 else 0, axis = 1)
 
     # Column P - Battery charge incrase
     df['batteryChargeIncrease'] = df['chargeInFromSolar'] + df['chargeInFromGrid']
 
+    df['batteryChargeDecrease'] = 0
+    df['chargeAmount'] = df['batteryChargeIncrease'] - df['batteryChargeDecrease']
+
+    # Column V - Battery state of charge in kWh
+    df['storedBatteryEnergy'] = df['chargeAmount'].cumsum().apply(lambda x: min(x, 6))
+
     # Column T - Discharge to load
-    df['dischargeToLoad'] = df.apply(lambda x: (min(max(x['load_power_kW'] - x['pvPowerAfterScaling'], 0), x['storedBatteryEnergy']*np.sqrt(batteryEfficiency)) if x['batteryMode'] == 1 else 0), axis = 1)
+    df['dischargeToLoad'] = df.apply(lambda x: (min(max(x['load_power_kW'] - x['pvPowerAfterScaling'], 0), df.loc[(x.name - 1 if x.name > 0 else 0)]['storedBatteryEnergy']*np.sqrt(batteryEfficiency)) if x['batteryMode'] == 1 else 0), axis = 1)
 
     # Column U - Discharge to grid
     df['dischargeToGrid'] = ((df['batteryOutputPowerToGrid'] 
@@ -75,11 +82,6 @@ def functionToOptimize(functionInputs):
 
     # Column S - Battery discharge
     df['batteryChargeDecrease'] = df['dischargeToLoad'] + df['dischargeToGrid']
-
-    df['chargeAmount'] = df['batteryChargeIncrease'] - df['batteryChargeDecrease']
-
-    # Column V - Battery state of charge in kWh
-    df['storedBatteryEnergy'] = df['chargeAmount'].cumsum().apply(lambda x: min(x, 6))
 
     # Column W - Battery SOC%
     df['batterySOC'] =  df['storedBatteryEnergy']/(functionInputs[1]*6)
@@ -95,6 +97,9 @@ def functionToOptimize(functionInputs):
 
     # Column AB - Export income
     df['exportIncome'] = df.apply(lambda x: (abs(x['gridConsumption'] if x['gridConsumption'] < 0 else 0))*x['price_gridExport_NZDperkWh']/4,axis=1)
+
+    df.to_csv('customerData_modified.csv', index=False, encoding='utf-8')
+
     return (df['costPostSolar'].sum() + costOfBatteries + costOfPanels)
 
 result = scipy.optimize.minimize(functionToOptimize, functionInputs)
@@ -122,7 +127,6 @@ print(result)
 #                                                    * df['grid_renewableFraction_pct'])) / df['load_power_kW']
 
 # Produces csv with final DataFrame
-df.to_csv('customerData_modified.csv', index=False, encoding='utf-8')
 
 # Prints total cost for one year TODO use new columns
 # print('Total cost before solar: ', (df['priceBeforeSolar'].sum()))
