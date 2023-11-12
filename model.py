@@ -48,25 +48,16 @@ df['batteryOutput'] = 0
 
 # Column Q - Charge from solar
 df['storedBatteryEnergy'] = batteryCapacity / 2
-df['chargeInFromSolar'] = df.apply(lambda x: min(max(x['pvPowerAfterScaling'] - x['load_power_kW'], 0), batteryCapacity - x['storedBatteryEnergy']), axis=1)
-
-#df['chargeInSolar'] = ((df['pvPowerAfterScaling'] - df['load_power_kW'], 0).max())
+df['chargeInFromSolar'] = df.apply(lambda x: (min(max(x['pvPowerAfterScaling'] - x['load_power_kW'], 0), batteryCapacity - x['storedBatteryEnergy'])) if x['batteryMode'] == 1 else 0, axis=1)
 
 # Column R - Charge from grid
-df['chargeInFromGrid'] = ((df['batteryInput'] 
-                           if df['batteryInput'] < batteryCapacity - df['storedBatteryEnergy'] 
-                           else batteryCapacity - df['storedBatteryEnergy'])/np.sqrt(batteryCapacity) 
-                           if df['batteryMode'] is 2 else 0)
+df['chargeInFromGrid'] = df.apply(lambda x: min(x['batteryInput'], batteryCapacity-x['storedBatteryEnergy']) if x['batteryMode'] == 2 else 0)
 
 # Column P - Battery charge incrase
 df['batteryChargeIncrease'] = df['chargeInFromSolar'] + df['chargeInFromGrid']
 
 # Column T - Discharge to load
-df['dischargeToLoad'] = ((
-    (df['load_power_kW'] - df['pvPowerAfterScaling'] if df['load_power_kW'] - df['pvPowerAfterScaling'] > 0 else 0)
-    if df['storedBatteryEnergy'] > ((df['load_power_kW'] - df['pvPowerAfterScaling'] if df['load_power_kW'] - df['pvPowerAfterScaling'] > 0 else 0)) 
-    else ((df['load_power_kW'] - df['pvPowerAfterScaling'] if df['pvPowerAfterScaling'] - df['load_power_kW'] > 0 else 0)))/np.sqrt(batteryCapacity) 
-    if df['batteryMode'] is 1 else 0)
+df['dischargeToLoad'] = df.apply(lambda x: min(max(x['load_power_kW'] - x['pvPowerAfterSolar'], 0), x['storedBatteryEnergy']*np.sqrt(batteryEfficiency) if x['batteryMode'] == 1 else 0))
 
 # Column U - Discharge to grid
 df['dischargeToGrid'] = ((df['batteryOutput'] 
