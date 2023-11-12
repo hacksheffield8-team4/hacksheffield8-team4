@@ -25,12 +25,14 @@ batteryCapacity = numberOfBatteries * 6
 costOfPanels = newNumberOfPanels * 80
 costOfBatteries = numberOfBatteries * 200
 
+# Column for price before solar
+df['priceBeforeSolar'] = df['price_gridImport_NZDperkWh'] * df['load_power_kW']
+
 # Column F - PV power after scaling factor
 df['powerAfterScaling'] = (df['pv_totalPower_kW'] * newNumberOfPanels) / df['NumberOfPanels']
 
 # Column K - Renewable energy to load before solar
 df['energy2loadPreSolar'] = df['grid_renewableFraction_pct']*df['load_power_kW']/4
-
 
 
 # Adds column to DataFrame with cost for each 15 minute interval
