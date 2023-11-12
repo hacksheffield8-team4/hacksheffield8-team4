@@ -17,18 +17,22 @@ df = df.sort_values(by='Formatted_DateTime')
 
 batteryEfficiency = 0.92
 
-newNumberOfPanels = 9
+newNumberOfPanels = 1
 numberOfBatteries = 1
 
 functionInputs = np.array([newNumberOfPanels, numberOfBatteries])
 
-batteryCapacity = numberOfBatteries * 6   # 6 kWh per battery
+# batteryCapacity = numberOfBatteries * 6   # 6 kWh per battery
 
-costOfPanels = newNumberOfPanels * 80
-costOfBatteries = numberOfBatteries * 200
+# costOfPanels = newNumberOfPanels * 80
+# costOfBatteries = numberOfBatteries * 200
 
 
 def functionToOptimize(functionInputs):
+    if functionInputs[0] < 0 or functionInputs[1] < 0:
+        return np.infty
+    costOfPanels = functionInputs[0] * 80
+    costOfBatteries = functionInputs[1] * 200
     # Column F - PV power after scaling factor
     df['pvPowerAfterScaling'] = (df['pv_totalPower_kW'] * functionInputs[0]) / df['NumberOfPanels']
 
@@ -91,7 +95,7 @@ def functionToOptimize(functionInputs):
 
     # Column AB - Export income
     df['exportIncome'] = df.apply(lambda x: (abs(x['gridConsumption'] if x['gridConsumption'] < 0 else 0))*x['price_gridExport_NZDperkWh']/4,axis=1)
-    return df['costPostSolar'].sum()
+    return (df['costPostSolar'].sum() + costOfBatteries + costOfPanels)
 
 result = scipy.optimize.minimize(functionToOptimize, functionInputs)
 
