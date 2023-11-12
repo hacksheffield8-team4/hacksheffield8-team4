@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from pkg_resources import load_entry_point
 
 df = pd.read_csv("customerData.csv")
 
@@ -68,9 +67,12 @@ df['dischargeToGrid'] = ((df['batteryOutput']
 # Column S - Battery discharge
 df['batteryChargeDecrease'] = df['dischargeToLoad'] + df['dischargeToGrid']
 
-# Column V - Battery state of charge in kWh TODO something is wrong here!! battery capacity never changes from 3kWh
-df['storedBatteryEnergy'] = batteryCapacity / 2
+# Column V - Battery state of charge in kWh TODO something is wrong here!!
 df['storedBatteryEnergy'] = df['storedBatteryEnergy'].shift(-1) + df['batteryChargeIncrease'] - df['batteryChargeDecrease']
+
+df['chargeInFromSolar'] = df.apply(lambda x: (min(max(x['pvPowerAfterScaling'] - x['load_power_kW'], 0), batteryCapacity - x['storedBatteryEnergy'])) if x['batteryMode'] == 1 else 0, axis = 1)
+df['storedBatteryEnergy'] = df['storedBatteryEnergy'].shift(-1) + df['batteryChargeIncrease'] - df['batteryChargeDecrease']
+
 
 # Column W - Battery SOC%
 df['batterySOC'] =  df['storedBatteryEnergy']/batteryCapacity
@@ -79,13 +81,13 @@ df['batterySOC'] =  df['storedBatteryEnergy']/batteryCapacity
 df['gridConsumption'] = df['load_power_kW'] - df['pvSuppliedToLoad'] - df['pvPowerAfterScaling'] + df['batteryChargeIncrease'] - df['batteryChargeDecrease']
 
 # Column Y - Electricity cost post solar
-df['costPostSolar'] = df['load_power_kW'] * (df['gridConsumption'] if df['gridConsumption'] > 0 else 0) / 4
+df['costPostSolar'] = df.apply(lambda x: x['load_power_kW'] * (x['gridConsumption'] if x['gridConsumption'] > 0 else 0) / 4, axis=1)
 
 # Column Z - Renewable energy to load post solar
-df['renewableEnergyPostSolar'] = (df['grid_renewableFraction_pct'] * (df['gridConsumption'] if df['gridConsumption'] > 0 else 0) + df['pvSuppliedToLoad'] + df['chargeInFromSolar'])/4
+df['renewableEnergyPostSolar'] = df.apply(lambda x: (x['grid_renewableFraction_pct'] * (x['gridConsumption'] if x['gridConsumption'] > 0 else 0) + x['pvSuppliedToLoad'] + x['chargeInFromSolar'])/4, axis=1)
 
 # Column AB - Export income
-df['exportIncome'] = (abs(df['gridConsumption'] if df['gridConsumption'] < 0 else 0))*df['price_gridExport_NZDperkWh']/4
+df['exportIncome'] = df.apply(lambda x: (abs(x['gridConsumption'] if x['gridConsumption'] < 0 else 0))*x['price_gridExport_NZDperkWh']/4,axis=1)
 
 # Adds column to DataFrame with cost for each 15 minute interval
 df['cost_for_15m'] = df['price_gridImport_NZDperkWh'] * ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels'])) / 4)
