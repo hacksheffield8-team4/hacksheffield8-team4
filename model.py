@@ -28,7 +28,7 @@ costOfBatteries = numberOfBatteries * 200
 df['pvPowerAfterScaling'] = (df['pv_totalPower_kW'] * newNumberOfPanels) / df['NumberOfPanels']
 
 # Column J - Price before solar
-df['priceBeforeSolar'] = df['price_gridImport_NZDperkWh'] * df['load_power_kW']
+df['priceBeforeSolar'] = df['price_gridImport_NZDperkWh'] * df['load_power_kW']/4
 
 # Column K - Renewable energy to load before solar
 df['energy2loadPreSolar'] = df['grid_renewableFraction_pct']*df['load_power_kW']/4
@@ -119,4 +119,4 @@ print('Total cost after export: ', (costOfPanels + df['cost_for_15m'].sum()))
 print('Power consumed: ', ((df['load_power_kW'].sum())/4))
 print('Power generated: ', (df['solar_energy_for_15m'].sum()))
 print('Percentage Renewable: ', (df['home_renewableFraction'].mean()))
-print('Total cost before solar: ', ())
+print('Total cost before solar: ', (df['priceBeforeSolar'].sum()))
