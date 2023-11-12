@@ -1,6 +1,6 @@
-import mmap
 import pandas as pd
 import numpy as np
+from pkg_resources import load_entry_point
 
 df = pd.read_csv("customerData.csv")
 
@@ -26,7 +26,7 @@ costOfPanels = newNumberOfPanels * 80
 costOfBatteries = numberOfBatteries * 200
 
 # Column F - PV power after scaling factor
-df['powerAfterScaling'] = (df['pv_totalPower_kW'] * newNumberOfPanels) / df['NumberOfPanels']
+df['pvPowerAfterScaling'] = (df['pv_totalPower_kW'] * newNumberOfPanels) / df['NumberOfPanels']
 
 # Column J - Price before solar
 df['priceBeforeSolar'] = df['price_gridImport_NZDperkWh'] * df['load_power_kW']
@@ -35,10 +35,55 @@ df['priceBeforeSolar'] = df['price_gridImport_NZDperkWh'] * df['load_power_kW']
 df['energy2loadPreSolar'] = df['grid_renewableFraction_pct']*df['load_power_kW']/4
 
 # Column L - Power supplied to load
-df['pvSuppliedToLoad'] = df[['powerAfterScaling', 'load_power_kW']]
+df['pvSuppliedToLoad'] = df[['pvPowerAfterScaling', 'load_power_kW']].min(axis=1)
 
 # Column M - Battery mode
 df['batteryMode'] = 1
+
+# Column N - Power into battery
+df['batteryInput'] = 0
+
+# Column O - Power out of battery
+df['batteryOutput'] = 0
+
+# Column P - Battery charge incrase
+df['batteryChargeIncrease'] = df['chargeInFromSolar'] + df['chargeInFromGrid']
+
+# Column Q - Charge from solar
+df['chargeInFromSolar'] = ((
+    (df['pvPowerAfterScaling'] - df['load_power_kW'] if df['pvPowerAfterScaling'] - df['load_power_kW'] > 0 else 0)
+    if batteryCapacity - df['storedBatteryCapacity'] > ((df['pvPowerAfterScaling'] - df['load_power_kW'] if df['pvPowerAfterScaling'] - df['load_power_kW'] > 0 else 0)) 
+    else ((df['pvPowerAfterScaling'] - df['load_power_kW'] if df['pvPowerAfterScaling'] - df['load_power_kW'] > 0 else 0)))/np.sqrt(batteryCapacity) if df['batteryMode'] == 1 else 0)
+
+# Column R - Charge from grid
+#df['chargeInFromGrid'] = ()#TODO
+
+# Column S - Battery discharge
+df['batteryChargeDecrease'] = df['dischargeToLoad'] + df['dischargeToGrid']
+
+# Column T - Discharge to load
+#df['dischargeToLoad'] = #TODO
+
+# Column U - Discharge to grid
+#df['dischargeToGrid'] = #TODO
+
+# Column V - Battery state of charge in kWh
+df['storedBatteryEnergy'] = df['stored_battery_energy'].shift(-1) + df['batteryChargeIncrease'] - df['batteryChargeDecrease']
+
+# Column W - Battery SOC%
+df['batterySOC'] =  df['stored_battery_energy']/batteryCapacity
+
+# Column X - New grid consumption
+df['gridConsumption'] = df['load_power_kW'] - df['pvSuppliedToLoad'] - df['pvPowerAfterScaling'] + df['batteryChargeIncrease'] - df['batteryChargeDecrease']
+
+# Column Y - Electricity cost post solar
+df['costPostSolar'] = df['load_power_kW'] * (df['gridConsumption'] if df['gridConsumption'] > 0 else 0) / 4
+
+# Column Z - Renewable energy to load post solar
+df['renewableEnergyPostSolar'] = (df['grid_renewableFraction_pct'] * (df['gridConsumption'] if df['gridConsumption'] > 0 else 0) + df['pvSuppliedToLoad'] + df['chargeInFromSolar'])/4
+
+# Column AB - Export income
+df['exportIncome'] = (abs(df['gridConsumption'] if df['gridConsumption'] < 0 else 0))*df['price_gridExport_NZDperkWh']/4
 
 # Adds column to DataFrame with cost for each 15 minute interval
 df['cost_for_15m'] = df['price_gridImport_NZDperkWh'] * ((df['load_power_kW'] - (df['pv_totalPower_kW'] * newNumberOfPanels / df['NumberOfPanels'])) / 4)
