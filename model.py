@@ -46,8 +46,9 @@ df['batteryInput'] = 0
 # Column O - Power out of battery
 df['batteryOutput'] = 0
 
-# Column Q - Charge from solar TODO this is broken
-df['chargeInFromSolar'] = df.apply(lambda x: min(max(x['pvPowerAfterScaling'] - x['load_power_kW'], 0), batteryCapacity - x['storedBatteryEnergy']))
+# Column Q - Charge from solar
+df['storedBatteryEnergy'] = batteryCapacity / 2
+df['chargeInFromSolar'] = df.apply(lambda x: min(max(x['pvPowerAfterScaling'] - x['load_power_kW'], 0), batteryCapacity - x['storedBatteryEnergy']), axis=1)
 
 #df['chargeInSolar'] = ((df['pvPowerAfterScaling'] - df['load_power_kW'], 0).max())
 
