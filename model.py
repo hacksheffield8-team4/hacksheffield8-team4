@@ -46,12 +46,10 @@ df['batteryInput'] = 0
 # Column O - Power out of battery
 df['batteryOutput'] = 0
 
-# Column Q - Charge from solar
-df['chargeInFromSolar'] = ((
-    (df['pvPowerAfterScaling'] - df['load_power_kW'] if df['pvPowerAfterScaling'] - df['load_power_kW'] > 0 else 0)
-    if batteryCapacity - df['storedBatteryEnergy'] > ((df['pvPowerAfterScaling'] - df['load_power_kW'] if df['pvPowerAfterScaling'] - df['load_power_kW'] > 0 else 0)) 
-    else ((df['pvPowerAfterScaling'] - df['load_power_kW'] if df['pvPowerAfterScaling'] - df['load_power_kW'] > 0 else 0)))/np.sqrt(batteryCapacity) 
-    if df['batteryMode'] is 1 else 0)
+# Column Q - Charge from solar TODO this is broken
+df['chargeInFromSolar'] = df.apply(lambda x: min(max(x['pvPowerAfterScaling'] - x['load_power_kW'], 0), batteryCapacity - x['storedBatteryEnergy']))
+
+#df['chargeInSolar'] = ((df['pvPowerAfterScaling'] - df['load_power_kW'], 0).max())
 
 # Column R - Charge from grid
 df['chargeInFromGrid'] = ((df['batteryInput'] 
@@ -78,8 +76,8 @@ df['dischargeToGrid'] = ((df['batteryOutput']
 # Column S - Battery discharge
 df['batteryChargeDecrease'] = df['dischargeToLoad'] + df['dischargeToGrid']
 
-# Column V - Battery state of charge in kWh
-df['storedBatteryEnergy'] = batteryCapacity/2
+# Column V - Battery state of charge in kWh TODO something is wrong here!! battery capacity never changes from 3kWh
+df['storedBatteryEnergy'] = batteryCapacity / 2
 df['storedBatteryEnergy'] = df['storedBatteryEnergy'].shift(-1) + df['batteryChargeIncrease'] - df['batteryChargeDecrease']
 
 # Column W - Battery SOC%
