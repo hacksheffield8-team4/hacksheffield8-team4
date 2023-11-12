@@ -39,18 +39,18 @@ df['pvSuppliedToLoad'] = df[['pvPowerAfterScaling', 'load_power_kW']].min(axis=1
 # Column M - Battery mode
 df['batteryMode'] = 1
 
-# Column N - Power into battery
-df['batteryInput'] = 0
+# Column N - Power into battery from grid
+df['batteryInputPowerFromGrid'] = 0
 
-# Column O - Power out of battery
-df['batteryOutput'] = 0
+# Column O - Power out of battery to grid
+df['batteryOutputPowerToGrid'] = 0
 
 # Column Q - Charge from solar TODO need to use previous storedBatteryEnergy
 df['storedBatteryEnergy'] = 0
 df['chargeInFromSolar'] = df.apply(lambda x: (min(max(x['pvPowerAfterScaling'] - x['load_power_kW'], 0), batteryCapacity - x['storedBatteryEnergy'])) if x['batteryMode'] == 1 else 0, axis = 1)
 
 # Column R - Charge from grid
-df['chargeInFromGrid'] = df.apply(lambda x: min(x['batteryInput'], batteryCapacity-x['storedBatteryEnergy']) if x['batteryMode'] == 2 else 0, axis = 1)
+df['chargeInFromGrid'] = df.apply(lambda x: min(x['batteryInpuPowerFromGrid'], batteryCapacity-x['storedBatteryEnergy']) if x['batteryMode'] == 2 else 0, axis = 1)
 
 # Column P - Battery charge incrase
 df['batteryChargeIncrease'] = df['chargeInFromSolar'] + df['chargeInFromGrid']
@@ -59,8 +59,8 @@ df['batteryChargeIncrease'] = df['chargeInFromSolar'] + df['chargeInFromGrid']
 df['dischargeToLoad'] = df.apply(lambda x: min(max(x['load_power_kW'] - x['pvPowerAfterScaling'], 0), x['storedBatteryEnergy']*np.sqrt(batteryEfficiency) if x['batteryMode'] == 1 else 0), axis = 1)
 
 # Column U - Discharge to grid
-df['dischargeToGrid'] = ((df['batteryOutput'] 
-                           if df['batteryOutput'] < df['storedBatteryEnergy'] 
+df['dischargeToGrid'] = ((df['batteryOutputPowerToGrid'] 
+                           if df['batteryOutputPowerToGrid'] < df['storedBatteryEnergy'] 
                            else df['storedBatteryEnergy'])/np.sqrt(batteryCapacity) 
                            if df['batteryMode'] is 2 else 0)
 
@@ -112,8 +112,8 @@ df['exportIncome'] = df.apply(lambda x: (abs(x['gridConsumption'] if x['gridCons
 df.to_csv('customerData_modified.csv', index=False, encoding='utf-8')
 
 # Prints total cost for one year TODO use new columns
-print('Total cost before solar: ', (df['priceBeforeSolar'].sum()))
-print('Total cost after export: ', (costOfPanels + df['cost_for_15m'].sum()))
-print('Power consumed: ', ((df['load_power_kW'].sum())/4))
-print('Power generated: ', (df['solar_energy_for_15m'].sum()))
-print('Percentage Renewable: ', (df['home_renewableFraction'].mean()))
+# print('Total cost before solar: ', (df['priceBeforeSolar'].sum()))
+# print('Total cost after export: ', (costOfPanels + df['cost_for_15m'].sum()))
+# print('Power consumed: ', ((df['load_power_kW'].sum())/4))
+# print('Power generated: ', (df['solar_energy_for_15m'].sum()))
+# print('Percentage Renewable: ', (df['home_renewableFraction'].mean()))
