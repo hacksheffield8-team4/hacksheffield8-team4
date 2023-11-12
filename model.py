@@ -4,7 +4,7 @@ import numpy as np
 df = pd.read_csv("customerData.csv")
 
 # Remove duplicate rows and save to new csv
-df_duplicates_removed = df.drop_duplicates()
+df = df.drop_duplicates()
 
 # Choose a specific customer by ID
 customerID = 25
@@ -19,7 +19,7 @@ batteryEfficiency = 0.92
 newNumberOfPanels = 9
 numberOfBatteries = 1
 
-batteryCapacity = numberOfBatteries * 6
+batteryCapacity = numberOfBatteries * 6   # 6 kWh per battery
 
 costOfPanels = newNumberOfPanels * 80
 costOfBatteries = numberOfBatteries * 200
@@ -70,7 +70,8 @@ df['batteryChargeDecrease'] = df['dischargeToLoad'] + df['dischargeToGrid']
 df['chargeAmount'] = df['batteryChargeIncrease'] - df['batteryChargeDecrease']
 
 # Column V - Battery state of charge in kWh TODO something is wrong here!!
-df['storedBatteryEnergy'] = df['chargeAmount'].cumsum()
+df['storedBatteryEnergy'] = df['chargeAmount'].cumsum().apply(lambda x: min(x, 6))
+#df['storedBatteryEnergy'] = df['storedBatteryEnergy'].apply(lambda x: min(x, 6))  #df['storedBatteryEnergy'].clip(upper=6)
 
 # Column W - Battery SOC%
 df['batterySOC'] =  df['storedBatteryEnergy']/batteryCapacity
