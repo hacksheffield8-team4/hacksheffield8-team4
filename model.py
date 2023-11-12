@@ -52,20 +52,31 @@ df['batteryChargeIncrease'] = df['chargeInFromSolar'] + df['chargeInFromGrid']
 # Column Q - Charge from solar
 df['chargeInFromSolar'] = ((
     (df['pvPowerAfterScaling'] - df['load_power_kW'] if df['pvPowerAfterScaling'] - df['load_power_kW'] > 0 else 0)
-    if batteryCapacity - df['storedBatteryCapacity'] > ((df['pvPowerAfterScaling'] - df['load_power_kW'] if df['pvPowerAfterScaling'] - df['load_power_kW'] > 0 else 0)) 
-    else ((df['pvPowerAfterScaling'] - df['load_power_kW'] if df['pvPowerAfterScaling'] - df['load_power_kW'] > 0 else 0)))/np.sqrt(batteryCapacity) if df['batteryMode'] == 1 else 0)
+    if batteryCapacity - df['storedBatteryEnergy'] > ((df['pvPowerAfterScaling'] - df['load_power_kW'] if df['pvPowerAfterScaling'] - df['load_power_kW'] > 0 else 0)) 
+    else ((df['pvPowerAfterScaling'] - df['load_power_kW'] if df['pvPowerAfterScaling'] - df['load_power_kW'] > 0 else 0)))/np.sqrt(batteryCapacity) 
+    if df['batteryMode'] == 1 else 0)
 
 # Column R - Charge from grid
-#df['chargeInFromGrid'] = ()#TODO
+df['chargeInFromGrid'] = ((df['batteryInput'] 
+                           if df['batteryInput'] < batteryCapacity - df['storedBatteryEnergy'] 
+                           else batteryCapacity - df['storedBatteryEnergy'])/np.sqrt(batteryCapacity) 
+                           if df['batteryMode'] == 2 else 0)
 
 # Column S - Battery discharge
 df['batteryChargeDecrease'] = df['dischargeToLoad'] + df['dischargeToGrid']
 
 # Column T - Discharge to load
-#df['dischargeToLoad'] = #TODO
+df['dischargeToLoad'] = ((
+    (df['load_power_kW'] - df['pvPowerAfterScaling'] if df['load_power_kW'] - df['pvPowerAfterScaling'] > 0 else 0)
+    if df['storedBatteryEnergy'] > ((df['load_power_kW'] - df['pvPowerAfterScaling'] if df['load_power_kW'] - df['pvPowerAfterScaling'] > 0 else 0)) 
+    else ((df['load_power_kW'] - df['pvPowerAfterScaling'] if df['pvPowerAfterScaling'] - df['load_power_kW'] > 0 else 0)))/np.sqrt(batteryCapacity) 
+    if df['batteryMode'] == 1 else 0)
 
 # Column U - Discharge to grid
-#df['dischargeToGrid'] = #TODO
+df['dischargeToGrid'] = ((df['batteryOutput'] 
+                           if df['batteryOutput'] < df['storedBatteryEnergy'] 
+                           else df['storedBatteryEnergy'])/np.sqrt(batteryCapacity) 
+                           if df['batteryMode'] == 2 else 0)
 
 # Column V - Battery state of charge in kWh
 df['storedBatteryEnergy'] = df['stored_battery_energy'].shift(-1) + df['batteryChargeIncrease'] - df['batteryChargeDecrease']
