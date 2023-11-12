@@ -50,12 +50,12 @@ df['storedBatteryEnergy'] = 0
 df['chargeInFromSolar'] = df.apply(lambda x: (min(max(x['pvPowerAfterScaling'] - x['load_power_kW'], 0), batteryCapacity - df['storedBatteryEnergy'].shift(-1))) if x['batteryMode'] == 1 else 0, axis = 1)
 
 # Column R - Charge from grid TODO need to use previous storedBatteryEnergy
-df['chargeInFromGrid'] = df.apply(lambda x: min(x['batteryInput'], batteryCapacity-df['storedBatteryEnergy'].shift(-1)) if x['batteryMode'] == 2 else 0, axis = 1)
+df['chargeInFromGrid'] = df.apply(lambda x: min(x['batteryInput'], batteryCapacity-x['storedBatteryEnergy']) if x['batteryMode'] == 2 else 0, axis = 1)
 
 # Column P - Battery charge incrase
 df['batteryChargeIncrease'] = df['chargeInFromSolar'] + df['chargeInFromGrid']
 
-# Column T - Discharge to load
+# Column T - Discharge to load TODO need to use previous storedBatteryEnergy
 df['dischargeToLoad'] = df.apply(lambda x: min(max(x['load_power_kW'] - x['pvPowerAfterScaling'], 0), x['storedBatteryEnergy']*np.sqrt(batteryEfficiency) if x['batteryMode'] == 1 else 0), axis = 1)
 
 # Column U - Discharge to grid
