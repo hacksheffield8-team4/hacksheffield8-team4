@@ -65,7 +65,7 @@ def functionToOptimize(functionInputs):
     df['batteryChargeIncrease'] = df['chargeInFromSolar'] + df['chargeInFromGrid']
 
     # Column T - Discharge to load
-    df['dischargeToLoad'] = df.apply(lambda x: min(max(x['load_power_kW'] - x['pvPowerAfterScaling'], 0), x['storedBatteryEnergy']*np.sqrt(batteryEfficiency) if x['batteryMode'] == 1 else 0), axis = 1)
+    df['dischargeToLoad'] = df.apply(lambda x: (min(max(x['load_power_kW'] - x['pvPowerAfterScaling'], 0), x['storedBatteryEnergy']*np.sqrt(batteryEfficiency)) if x['batteryMode'] == 1 else 0), axis = 1)
 
     # Column U - Discharge to grid
     df['dischargeToGrid'] = ((df['batteryOutputPowerToGrid'] 
