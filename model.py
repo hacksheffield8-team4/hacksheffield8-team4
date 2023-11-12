@@ -46,7 +46,7 @@ df['batteryInput'] = 0
 df['batteryOutput'] = 0
 
 # Column Q - Charge from solar
-df['storedBatteryEnergy'] = batteryCapacity / 2
+df['storedBatteryEnergy'] = 0
 df['chargeInFromSolar'] = df.apply(lambda x: (min(max(x['pvPowerAfterScaling'] - x['load_power_kW'], 0), batteryCapacity - x['storedBatteryEnergy'])) if x['batteryMode'] == 1 else 0, axis = 1)
 
 # Column R - Charge from grid
@@ -69,10 +69,6 @@ df['batteryChargeDecrease'] = df['dischargeToLoad'] + df['dischargeToGrid']
 
 # Column V - Battery state of charge in kWh TODO something is wrong here!!
 df['storedBatteryEnergy'] = df['storedBatteryEnergy'].shift(-1) + df['batteryChargeIncrease'] - df['batteryChargeDecrease']
-
-df['chargeInFromSolar'] = df.apply(lambda x: (min(max(x['pvPowerAfterScaling'] - x['load_power_kW'], 0), batteryCapacity - x['storedBatteryEnergy'])) if x['batteryMode'] == 1 else 0, axis = 1)
-df['storedBatteryEnergy'] = df['storedBatteryEnergy'].shift(-1) + df['batteryChargeIncrease'] - df['batteryChargeDecrease']
-
 
 # Column W - Battery SOC%
 df['batterySOC'] =  df['storedBatteryEnergy']/batteryCapacity
