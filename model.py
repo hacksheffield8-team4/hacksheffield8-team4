@@ -1,3 +1,6 @@
+# Model to optimise the number of batteries and solar panels a certain customer should purchase.
+# Matthew Savin: msavin1@sheffield.ac.uk
+
 import pandas as pd
 import numpy as np
 import scipy
@@ -8,7 +11,7 @@ df = pd.read_csv("customerData.csv")
 df = df.drop_duplicates()
 
 # Choose a specific customer by ID
-customerID = 25
+customerID = 15
 df = df.loc[df['customerID'] == customerID]
 
 # Sort csv by date and time
